@@ -51,8 +51,8 @@ if n >= k:
     st.subheader("Results")
     st.write(f"**Fraction of time system is UP:** `{uptime:.4f}`")
 
-    st.bar_chart(π, use_container_width=True)
-    st.caption("Distribution of states (0 = no failures, ... up to n failed components)")
+    # st.bar_chart(π, use_container_width=True)
+    # st.caption("Distribution of states (0 = no failures, ... up to n failed components)")
 
 else:
     st.warning("Make sure that n ≥ k so the system is feasible.")
@@ -60,6 +60,7 @@ else:
 
 def draw_birth_death_graph(n, k, failure_rate, repair_rate, r, warm_standby):
     import matplotlib.pyplot as plt
+    import streamlit as st
 
     fig, ax = plt.subplots(figsize=(1.6 * n, 2))
 
@@ -68,31 +69,37 @@ def draw_birth_death_graph(n, k, failure_rate, repair_rate, r, warm_standby):
         ax.plot(i, 0, 'o', markersize=30, color='lightblue')
         ax.text(i, 0, str(i), ha='center', va='center', fontsize=12)
 
-    # Draw bottom arrows (failures: λ)
+    # Failure arrows (mu): i → i+1 (right)
     for i in range(n):
-        arrow_label = f"{int((n - i) if warm_standby else min(n - i, k))}λ"
-        ax.annotate("",
-                    xy=(i + 0.8, -0.15), xytext=(i + 0.2, -0.15),
-                    arrowprops=dict(arrowstyle="->", color="red", lw=2))
-        ax.text(i + 0.5, -0.25, arrow_label, ha='center', va='top', fontsize=10, color='red')
+        if warm_standby:
+            fail_rate = n - i  # number of working components
+        else:
+            # cold standby: failures allowed until system is down (i <= k-1)
+            fail_rate = k if i <= (k-1) else 0
 
-    # Draw top arrows (repairs: μ)
+        if fail_rate > 0:
+            arrow_label = f"{fail_rate}μ"
+            ax.annotate("",
+                        xy=(i + 0.8, 0.15), xytext=(i + 0.2, 0.15), 
+                        arrowprops=dict(arrowstyle="->", color="red", lw=2))
+            ax.text(i + 0.5, 0.25, arrow_label, ha='center', va='bottom', fontsize=10, color='red')
+
+    # Repair arrows (γ): i → i-1 (left)
     for i in range(1, n + 1):
-        arrow_label = f"{min(i, r)}μ"
+        arrow_label = "γ"
         ax.annotate("",
-                    xy=(i - 0.8, 0.15), xytext=(i - 0.2, 0.15),
-                    arrowprops=dict(arrowstyle="->", color="green", lw=2))
-        ax.text(i - 0.5, 0.25, arrow_label, ha='center', va='bottom', fontsize=10, color='green')
+                    xy=(i - 0.2, -0.15), xytext=(i - 0.8, -0.15), 
+                    arrowprops=dict(arrowstyle="<-", color="green", lw=2))
+        ax.text(i - 0.5, -0.25, arrow_label, ha='center', va='top', fontsize=10, color='green')
 
-    # Formatting
     ax.set_xlim(-0.5, n + 0.5)
     ax.set_ylim(-0.5, 0.5)
     ax.set_axis_off()
-    ax.set_title("Birth-Death Process Diagram", fontsize=14)
+    title = "Birth-Death Process Diagram (Warm Standby)" if warm_standby else "Birth-Death Process Diagram (Cold Standby)"
+    ax.set_title(title, fontsize=14)
 
-    # Display in Streamlit
-    import streamlit as st
     st.pyplot(fig)
+
 
 
 st.subheader("Birth-Death Process Diagram")
@@ -101,9 +108,9 @@ draw_birth_death_graph(n, k, failure_rate, repair_rate, r, warm_standby)
 st.markdown("""
 **Explanation of states:**
 
-- Each node represents the number of **failed components**.
-- Node `0` means all components are **working**.
-- Node `n` means all components have **failed**.
-- Arrows at the **top** represent **repairs** (μ), moving left.
-- Arrows at the **bottom** represent **failures** (λ), moving right.
+- Each state represents the number of broken components.
+- State `0` means all components are **working**.
+- State `n` means all components have **failed**.
+- Arrows at the top are giving the rate of machine failure (mu).
+- Arrow at the bottom are giving the rate of machine repair (gamma).
 """)
