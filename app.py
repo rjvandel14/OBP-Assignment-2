@@ -82,7 +82,8 @@ def draw_birth_death_graph(n, k, r, warm_standby):
 
     # Repair arrows (γ): i → i-1 (left)
     for i in range(1, n + 1):
-        arrow_label = "γ"
+        repair= min(r,i)
+        arrow_label = f"{repair}γ"
         ax.annotate("",
                     xy=(i - 0.2, -0.15), xytext=(i - 0.8, -0.15), 
                     arrowprops=dict(arrowstyle="<-", color="green", lw=2))
