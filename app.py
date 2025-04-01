@@ -11,6 +11,12 @@ n = st.sidebar.number_input("Total number of components (n)", min_value=1, value
 k = st.sidebar.number_input("Required to work (k)", min_value=1, value=3, step=1)
 r = st.sidebar.number_input("Number of repairmen", min_value=1, value=1, step=1)
 
+st.sidebar.header("Cost Parameters")
+component_cost = st.sidebar.number_input("Cost per component", min_value=0.0, value=1.0, step=0.1)
+repairman_cost = st.sidebar.number_input("Cost per repairman", min_value=0.0, value=5.0, step=0.1)
+downtime_cost = st.sidebar.number_input("Cost per unit downtime", min_value=0.0, value=100.0, step=1.0)
+
+
 # --- Main content ---
 st.title("k-out-of-n Maintenance System")
 st.write("This app calculates the fraction of time the system is operational using a Markov model and steady-state probabilities.")
@@ -110,3 +116,36 @@ st.markdown("""
 - Arrows at the top are giving the rate of machine failure (mu).
 - Arrow at the bottom are giving the rate of machine repair (gamma).
 """)
+
+
+## Exercise (b)
+def total_cost(n, k, r, failure_rate, repair_rate, warm_standby, component_cost, repairman_cost, downtime_cost):
+    uptime, _ = compute_uptime_fraction(n, k, r, failure_rate, repair_rate, warm_standby)
+    return (
+        n * component_cost +
+        r * repairman_cost +
+        (1 - uptime) * downtime_cost
+    )
+
+def find_optimal_config(failure_rate, repair_rate, warm_standby, component_cost, repairman_cost, downtime_cost, k):
+    best_config = None
+    best_cost = float('inf')
+
+    for n_try in range(k, 15): 
+        for r_try in range(1, 10):
+            cost = total_cost(n_try, k, r_try, failure_rate, repair_rate,
+                                warm_standby, component_cost, repairman_cost, downtime_cost)
+            if cost < best_cost:
+                best_cost = cost
+                best_config = (n_try, r_try, cost)
+
+    return best_config
+
+st.subheader("Optimal Configuration (based on cost)")
+optimal = find_optimal_config(failure_rate, repair_rate, warm_standby,
+                              component_cost, repairman_cost, downtime_cost, int(k))
+
+if optimal:
+    opt_n, opt_r, opt_cost = optimal
+    st.write(f"Optimal number of components = {opt_n}, number of repairmen = {opt_r}")
+    st.write(f"Minimum total expected cost per unit time: **{opt_cost:.2f}**")
