@@ -17,7 +17,7 @@ st.write("This app calculates the fraction of time the system is operational usi
 
 # --- Uptime Calculation Function ---
 def compute_uptime_fraction(n, k, r, failure_rate, repair_rate, warm_standby=True):
-    birth_rates = []
+    failure_rates = []
     for i in range(n):
         if warm_standby:
             failure = (n - i) * failure_rate
@@ -26,17 +26,18 @@ def compute_uptime_fraction(n, k, r, failure_rate, repair_rate, warm_standby=Tru
                 failure = k * failure_rate
             else:
                 failure = 0
-        birth_rates.append(failure)
+        failure_rates.append(failure)
 
-    death_rates = [min(i, r) * repair_rate for i in range(1, n + 1)]
+    repair_rates = [min(i, r) * repair_rate for i in range(1, n + 1)]
+
 
     product_terms = [1.0]
     for i in range(1, n + 1):
-        if death_rates[i - 1] > 0:
-            ratio = birth_rates[i - 1] / death_rates[i - 1]
+        if repair_rates[i - 1] > 0:
+            ratio = failure_rates[i - 1] / repair_rates[i - 1]
         else:
             ratio = 0
-        product_terms.append(product_terms[-1] * ratio)
+        product_terms.append(product_terms[-1] * ratio) # We multiply with last element in list
 
     denominator = sum(product_terms)
     pi_0 = 1 / denominator
@@ -45,11 +46,11 @@ def compute_uptime_fraction(n, k, r, failure_rate, repair_rate, warm_standby=Tru
     max_failures_allowed = n - k
     uptime_fraction = sum(pi[i] for i in range(max_failures_allowed + 1))
 
-    return uptime_fraction, pi
+    return uptime_fraction
 
 # --- Results ---
 if n >= k:
-    uptime, pi = compute_uptime_fraction(int(n), int(k), int(r), failure_rate, repair_rate, warm_standby)
+    uptime = compute_uptime_fraction(int(n), int(k), int(r), failure_rate, repair_rate, warm_standby)
     
     st.subheader("Results")
     st.write(f"Fraction of time system is UP: {uptime:.4f}")
@@ -57,7 +58,7 @@ else:
     st.warning("Make sure that n ≥ k so the system is feasible.")
 
 # --- Birth-Death Diagram ---
-def draw_birth_death_graph(n, k, failure_rate, repair_rate, r, warm_standby):
+def draw_birth_death_graph(n, k, r, warm_standby):
     fig, ax = plt.subplots(figsize=(1.6 * n, 2))
 
     for i in range(n + 1):
@@ -94,8 +95,6 @@ def draw_birth_death_graph(n, k, failure_rate, repair_rate, r, warm_standby):
     ax.set_title(title, fontsize=14)
 
     st.pyplot(fig)
-
-
 
 st.subheader("Birth-Death Process Diagram")
 draw_birth_death_graph(n, k, failure_rate, repair_rate, r, warm_standby)
