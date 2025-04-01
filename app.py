@@ -53,7 +53,6 @@ if n >= k:
     
     st.subheader("Results")
     st.write(f"Fraction of time system is UP: {uptime:.4f}")
-    st.write(f"Steady-state probabilities (pi): {pi}")
 else:
     st.warning("Make sure that n ≥ k so the system is feasible.")
 
