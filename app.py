@@ -98,7 +98,7 @@ def draw_birth_death_graph(n, k, r, warm_standby):
     st.pyplot(fig)
 
 st.subheader("Birth-Death Process Diagram")
-draw_birth_death_graph(n, k, failure_rate, repair_rate, r, warm_standby)
+draw_birth_death_graph(n, k, r, warm_standby)
 
 # --- Legend ---
 st.markdown("""
