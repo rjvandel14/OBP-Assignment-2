@@ -47,4 +47,4 @@ The app requires the following inputs via the Streamlit interface:
 
 ## Author
 
-This app was developed as part of the assignment for the course **Optimization of Business Processes**.
+This app was developed by Day Dortmans and Roos van Andel as part of the assignment for the course **Optimization of Business Processes**.
