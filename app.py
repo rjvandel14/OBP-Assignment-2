@@ -19,7 +19,7 @@ downtime_cost = st.sidebar.number_input("Cost per unit downtime", min_value=0.0,
 
 # Titles 
 st.title("k-out-of-n Maintenance System")
-st.write("This app calculates the fraction of time the system is operational using a Markov model and steady-state probabilities.")
+
 
 # Uptime calculation
 def compute_uptime_fraction(n, k, r, failure_rate, repair_rate, warm_standby=True):
@@ -59,7 +59,7 @@ if n >= k:
     uptime = compute_uptime_fraction(int(n), int(k), int(r), failure_rate, repair_rate, warm_standby)
     
     st.subheader("Results")
-    st.write(f"Fraction of time system is up: {uptime:.4f}")
+    st.write(f"Fraction of time system is up: {uptime:.4f}.")
 else:
     st.warning("Make sure that n ≥ k so the system is feasible.")
 
@@ -149,5 +149,5 @@ optimal = find_optimal_config(failure_rate, repair_rate, warm_standby,
 
 if optimal:
     opt_n, opt_r, opt_cost = optimal
-    st.write(f"Optimal number of components = {opt_n}, number of repairmen = {opt_r}")
-    st.write(f"Minimum total expected cost per unit time: **{opt_cost:.2f}**")
+    st.write(f"Optimal number of components = {opt_n}, number of repairmen = {opt_r}.")
+    st.write(f"Minimum total expected cost per unit time: {opt_cost:.2f}.")
