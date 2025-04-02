@@ -1,7 +1,7 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 
-# --- Sidebar input ---
+# Sidebar
 st.sidebar.header("System Parameters")
 failure_rate = st.sidebar.number_input("Machine failure rate (mu)", min_value=0.0, value=0.1, step=0.01)
 repair_rate = st.sidebar.number_input("Repair rate (gamma)", min_value=0.0, value=1.0, step=0.1)
@@ -11,17 +11,17 @@ n = st.sidebar.number_input("Total number of components (n)", min_value=1, value
 k = st.sidebar.number_input("Required to work (k)", min_value=1, value=3, step=1)
 r = st.sidebar.number_input("Number of repairmen", min_value=1, value=1, step=1)
 
+# Sidebar for exercise b
 st.sidebar.header("Cost Parameters")
 component_cost = st.sidebar.number_input("Cost per component", min_value=0.0, value=1.0, step=0.1)
 repairman_cost = st.sidebar.number_input("Cost per repairman", min_value=0.0, value=5.0, step=0.1)
 downtime_cost = st.sidebar.number_input("Cost per unit downtime", min_value=0.0, value=100.0, step=1.0)
 
-
-# --- Main content ---
+# Titles 
 st.title("k-out-of-n Maintenance System")
 st.write("This app calculates the fraction of time the system is operational using a Markov model and steady-state probabilities.")
 
-# --- Uptime Calculation Function ---
+# Uptime calculation
 def compute_uptime_fraction(n, k, r, failure_rate, repair_rate, warm_standby=True):
     failure_rates = []
     for i in range(n):
@@ -54,16 +54,16 @@ def compute_uptime_fraction(n, k, r, failure_rate, repair_rate, warm_standby=Tru
 
     return uptime_fraction
 
-# --- Results ---
+# Results
 if n >= k:
     uptime = compute_uptime_fraction(int(n), int(k), int(r), failure_rate, repair_rate, warm_standby)
     
     st.subheader("Results")
-    st.write(f"Fraction of time system is UP: {uptime:.4f}")
+    st.write(f"Fraction of time system is up: {uptime:.4f}")
 else:
     st.warning("Make sure that n ≥ k so the system is feasible.")
 
-# --- Birth-Death Diagram ---
+# Birth death process
 def draw_birth_death_graph(n, k, r, warm_standby):
     fig, ax = plt.subplots(figsize=(1.6 * n, 2))
 
@@ -71,9 +71,9 @@ def draw_birth_death_graph(n, k, r, warm_standby):
         ax.plot(i, 0, 'o', markersize=30, color='lightblue')
         ax.text(i, 0, str(i), ha='center', va='center', fontsize=12)
 
-    # Failure arrows (mu): i → i+1 (right)
+    # failure mu: i to i+1 
     for i in range(n):
-        if warm_standby:
+        if warm_standby: # warmstandby
             fail_rate = n - i  # number of working components
         else:
             # cold standby: failures allowed until system is down (i <= k-1)
@@ -86,7 +86,7 @@ def draw_birth_death_graph(n, k, r, warm_standby):
                         arrowprops=dict(arrowstyle="->", color="red", lw=2))
             ax.text(i + 0.5, 0.25, arrow_label, ha='center', va='bottom', fontsize=10, color='red')
 
-    # Repair arrows (γ): i → i-1 (left)
+    # repair gamma: i to i-1
     for i in range(1, n + 1):
         repair= min(r,i)
         arrow_label = f"{repair}γ"
@@ -98,7 +98,7 @@ def draw_birth_death_graph(n, k, r, warm_standby):
     ax.set_xlim(-0.5, n + 0.5)
     ax.set_ylim(-0.5, 0.5)
     ax.set_axis_off()
-    title = "Birth-Death Process Diagram (Warm Standby)" if warm_standby else "Birth-Death Process Diagram (Cold Standby)"
+    title = "Warm Standby" if warm_standby else "Cold Standby"
     ax.set_title(title, fontsize=14)
 
     st.pyplot(fig)
@@ -106,19 +106,20 @@ def draw_birth_death_graph(n, k, r, warm_standby):
 st.subheader("Birth-Death Process Diagram")
 draw_birth_death_graph(n, k, r, warm_standby)
 
-# --- Legend ---
+# Text about results
 st.markdown("""
-**Explanation of states:**
+**Explanation of the birth-death process:**
 
 - Each state represents the number of broken components.
 - State `0` means all components are **working**.
 - State `n` means all components have **failed**.
 - Arrows at the top are giving the rate of machine failure (mu).
-- Arrow at the bottom are giving the rate of machine repair (gamma).
+- Arrows at the bottom are giving the rate of machine repair (gamma).
 """)
 
 
 ## Exercise (b)
+# Total cost function
 def total_cost(n, k, r, failure_rate, repair_rate, warm_standby, component_cost, repairman_cost, downtime_cost):
     uptime = compute_uptime_fraction(n, k, r, failure_rate, repair_rate, warm_standby)
     return (
@@ -127,17 +128,18 @@ def total_cost(n, k, r, failure_rate, repair_rate, warm_standby, component_cost,
         (1 - uptime) * downtime_cost
     )
 
+# Find best values given the costs
 def find_optimal_config(failure_rate, repair_rate, warm_standby, component_cost, repairman_cost, downtime_cost, k):
     best_config = None
     best_cost = float('inf')
 
-    for n_try in range(k, 15): 
-        for r_try in range(1, 10):
-            cost = total_cost(n_try, k, r_try, failure_rate, repair_rate,
+    for n_b in range(k, 100): # max amount of components set to 100
+        for r_b in range(1, 15): # max amount of repairmen is set to 15 
+            cost = total_cost(n_b, k, r_b, failure_rate, repair_rate,
                                 warm_standby, component_cost, repairman_cost, downtime_cost)
             if cost < best_cost:
                 best_cost = cost
-                best_config = (n_try, r_try, cost)
+                best_config = (n_b, r_b, cost)
 
     return best_config
 
