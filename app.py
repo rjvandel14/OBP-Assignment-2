@@ -104,7 +104,7 @@ def draw_birth_death_graph(n, k, r, warm_standby):
     st.pyplot(fig)
 
 st.subheader("Birth-Death Process Diagram")
-draw_birth_death_graph(n, k, failure_rate, repair_rate, r, warm_standby)
+draw_birth_death_graph(n, k, r, warm_standby)
 
 # --- Legend ---
 st.markdown("""
@@ -120,7 +120,7 @@ st.markdown("""
 
 ## Exercise (b)
 def total_cost(n, k, r, failure_rate, repair_rate, warm_standby, component_cost, repairman_cost, downtime_cost):
-    uptime, _ = compute_uptime_fraction(n, k, r, failure_rate, repair_rate, warm_standby)
+    uptime = compute_uptime_fraction(n, k, r, failure_rate, repair_rate, warm_standby)
     return (
         n * component_cost +
         r * repairman_cost +
