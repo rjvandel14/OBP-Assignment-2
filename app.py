@@ -129,7 +129,7 @@ def total_cost(n, k, r, failure_rate, repair_rate, warm_standby, component_cost,
     )
 
 # Find best values given the costs
-def find_optimal_config(failure_rate, repair_rate, warm_standby, component_cost, repairman_cost, downtime_cost, k):
+def find_optimal(failure_rate, repair_rate, warm_standby, component_cost, repairman_cost, downtime_cost, k):
     best_config = None
     best_cost = float('inf')
 
@@ -144,7 +144,7 @@ def find_optimal_config(failure_rate, repair_rate, warm_standby, component_cost,
     return best_config
 
 st.subheader("Optimal Configuration (based on cost)")
-optimal = find_optimal_config(failure_rate, repair_rate, warm_standby,
+optimal = find_optimal(failure_rate, repair_rate, warm_standby,
                               component_cost, repairman_cost, downtime_cost, int(k))
 
 if optimal:
