@@ -131,8 +131,10 @@ def find_optimal_config(failure_rate, repair_rate, warm_standby, component_cost,
     best_config = None
     best_cost = float('inf')
 
-    for n_try in range(k, 15): 
-        for r_try in range(1, 10):
+    max_repairman = max(50,k)
+
+    for n_try in range(k, k + 15): 
+        for r_try in range(1, max_repairman):
             cost = total_cost(n_try, k, r_try, failure_rate, repair_rate,
                                 warm_standby, component_cost, repairman_cost, downtime_cost)
             if cost < best_cost:
@@ -149,3 +151,5 @@ if optimal:
     opt_n, opt_r, opt_cost = optimal
     st.write(f"Optimal number of components = {opt_n}, number of repairmen = {opt_r}")
     st.write(f"Minimum total expected cost per unit time: **{opt_cost:.2f}**")
+else:
+    st.warning("No valid configuration found. Try adjusting input parameters or use smaller values for k.")
